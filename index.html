@@ -414,9 +414,12 @@
       </div>
 
       <!-- Stage with Safe Sandbox -->
-      <div class="screen-stage">
-        
-        <!-- HubStream 10-Sec Ad/Intro Overlay (Premium Layout) -->
+     <!-- Stage with Safe Sandbox -->
+    <div class="screen-stage">
+      
+      <!-- CLICK INTERCEPTOR OVERLAY -->
+      <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="this.style.display='none'"></div>
+      
         <div id="adOverlay" class="hidden" style="position: absolute; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px); z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center;">
           
           <div style="font-size: 20px; font-weight: 900; letter-spacing: 1px; margin-bottom: 20px;">Hub<span style="color: #e11d48;">Stream</span></div>
@@ -439,13 +442,14 @@
         </div>
 
         <!-- iFrame for embed links (Sandbox stops annoying pop-up tabs) -->
-        <iframe 
-          id="embedPlayer" 
-          src="" 
-          allowfullscreen 
-          allow="autoplay; encrypted-media; picture-in-picture"
-          referrerpolicy="no-referrer">
-        </iframe>
+       <iframe 
+  id="embedPlayer" 
+  src="" 
+  allowfullscreen 
+  allow="autoplay; encrypted-media; picture-in-picture"
+  referrerpolicy="no-referrer"
+  sandbox="allow-scripts allow-same-origin allow-presentation">
+</iframe>
 
         <!-- Direct MP4 Player for raw video links -->
         <video id="nativePlayer" controls class="hidden"></video>
