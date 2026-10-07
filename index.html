@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HubStream Cinema - Pure Embedded Player</title>
- <style>
+  <style>
     * {
       margin: 0;
       padding: 0;
@@ -383,7 +383,7 @@
     .hidden { display: none !important; }
     
     @keyframes spin { to { transform: rotate(360deg); } }
-</style>
+  </style>
 </head>
 <body>
 
@@ -402,7 +402,7 @@
     <div class="media-grid" id="gridArea"></div>
   </main>
 
-  <!-- EMBEDDED THEATER PLAYER (With Ad-Shield Sandbox) -->
+  <!-- EMBEDDED THEATER PLAYER -->
   <div id="playerModal" class="modal-overlay hidden">
     <div class="cinema-box">
       <div class="cinema-topbar">
@@ -413,25 +413,22 @@
         <button class="close-btn" onclick="closePlayer()">✕</button>
       </div>
 
-      <!-- Stage with Safe Sandbox -->
-     <!-- Stage with Safe Sandbox -->
-    <div class="screen-stage">
-      
-      <!-- CLICK INTERCEPTOR OVERLAY -->
-      <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="this.style.display='none'"></div>
-      
+      <!-- Stage with Click Shield & Player -->
+      <div class="screen-stage" style="position: relative;">
+        
+        <!-- CLICK INTERCEPTOR OVERLAY -->
+        <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="this.style.display='none'"></div>
+
+        <!-- HubStream 10-Sec Ad/Intro Overlay -->
         <div id="adOverlay" class="hidden" style="position: absolute; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px); z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center;">
           
           <div style="font-size: 20px; font-weight: 900; letter-spacing: 1px; margin-bottom: 20px;">Hub<span style="color: #e11d48;">Stream</span></div>
 
-          <!-- Ad Network Banner Space (Standard 300x250 Box) -->
           <div style="width: 300px; height: 250px; background: #1e293b; border: 1px dashed #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
             <span style="font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Advertisement</span>
             <span style="font-size: 13px; color: #cbd5e1;">Banner Ad (300x250)</span>
-            <!-- Future: Adsterra ya Monetag ka <script> tag yahan aayega -->
           </div>
 
-          <!-- Animated Loader & Timer -->
           <div style="display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.2); border-radius: 30px;">
             <div style="width: 18px; height: 18px; border: 3px solid #e11d48; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
             <div style="font-size: 13px; color: #e2e8f0; font-weight: 600;">
@@ -441,20 +438,19 @@
 
         </div>
 
-        <!-- iFrame for embed links (Sandbox stops annoying pop-up tabs) -->
-       <iframe 
-  id="embedPlayer" 
-  src="" 
-  allowfullscreen 
-  allow="autoplay; encrypted-media; picture-in-picture"
-  referrerpolicy="no-referrer"
-  sandbox="allow-scripts allow-same-origin allow-presentation">
-</iframe>
+        <!-- iFrame (Sandbox removed to fix detection errors) -->
+        <iframe 
+          id="embedPlayer" 
+          src="" 
+          allowfullscreen 
+          allow="autoplay; encrypted-media; picture-in-picture"
+          referrerpolicy="no-referrer">
+        </iframe>
 
-        <!-- Direct MP4 Player for raw video links -->
+        <!-- Direct MP4 Player -->
         <video id="nativePlayer" controls class="hidden"></video>
         
-        <!-- Our Custom Watermark to hide the cloud icon -->
+        <!-- Custom Watermark -->
         <div id="hsWatermark" class="watermark-cover hidden">HS</div>
       </div>
 
@@ -486,7 +482,7 @@
       <label>TMDB Movie ID (For Automation)</label>
       <input type="text" id="inTmdbId" placeholder="e.g. 1709391">
 
-      <label>Embedded Player Link / Embed URL (Leave blank for auto)</label>
+      <label>Embedded Player Link / Embed URL</label>
       <input type="url" id="inStreamUrl" placeholder="https://server-embed.com/e/xyz or .mp4 link">
 
       <button class="btn-submit" onclick="saveStreamItem()">Embed to Player ➔</button>
@@ -498,7 +494,6 @@
     let searchDebounce = null;
     let activeItem = null;
 
-    // Load initial movies from your SQLite database through server.py
     async function fetchMovies(query = "") {
       const grid = document.getElementById("gridArea");
       const url = query 
@@ -508,24 +503,11 @@
       try {
         const res = await fetch(url);
         let movies = await res.json();
-
-        // Pin Hanu-Man at the very top of catalog
-        if (!query) {
-          movies.unshift({
-            id: 1094556,
-            title: "Hanu-Man (2024)",
-            poster: "https://image.tmdb.org/t/p/w500/5m1Wv9z9nRj8Q7nQ5JtVf9jY8L2.jpg",
-            streamUrl: "https://hubstream.art/hlsmod/p16-ad-site-sign-sg.tiktokcdn.com/kaABCikw_hgCw9RMhpDddQ/ipt/ipljen89/etbsnf/tt/master.m3u8?v=1766826492",
-            year: "2024",
-            rating: 8.2
-          });
-        }
-
         renderCatalog(movies);
       } catch (err) {
         grid.innerHTML = `
           <div style="grid-column: 1/-1; color: #ef4444; padding: 30px; text-align: center;">
-            ⚠️ Local database server is not running. In your terminal run: <strong>python server.py</strong>
+            ⚠️ Local database server is not running.
           </div>
         `;
       }
@@ -535,16 +517,18 @@
       const grid = document.getElementById("gridArea");
       grid.innerHTML = "";
 
-      if (!items || items.length === 0) {
+      // Filter out unwanted "H.S" or other unwanted titles
+      const filteredItems = (items || []).filter(item => item.title !== "H.S");
+
+      if (filteredItems.length === 0) {
         grid.innerHTML = `<div style="grid-column: 1/-1; color: #64748b; text-align: center; padding: 30px;">No movies found.</div>`;
         return;
       }
 
-      items.forEach(item => {
+      filteredItems.forEach(item => {
         const card = document.createElement("div");
         card.className = "card";
         
-        // Setup playback item with default stream if not present
         const playableItem = {
           id: item.id,
           title: item.title,
@@ -569,7 +553,6 @@
       });
     }
 
-    // Live search connected to local SQLite database
     function handleSearch() {
       clearTimeout(searchDebounce);
       const query = document.getElementById("searchInput").value.trim();
@@ -578,9 +561,8 @@
       }, 250);
     }
 
-   let adInterval = null;
+    let adInterval = null;
 
-    // Smart Dual Player Handler
     function openTheater(item) {
       activeItem = item;
       document.getElementById("mTitle").innerText = item.title;
@@ -589,8 +571,11 @@
       const video = document.getElementById("nativePlayer");
       const adOverlay = document.getElementById("adOverlay");
       const adTimerText = document.getElementById("adTimer");
+      const shield = document.getElementById("clickShield");
 
-      // Stop any existing playback and clear old timers
+      // Reset shield on open
+      shield.style.display = "block";
+
       video.pause();
       iframe.src = "about:blank";
       clearInterval(adInterval);
@@ -599,7 +584,6 @@
 
       const streamSource = item.streamUrl || "";
 
-      // Check if source is a direct stream (.m3u8 or .mp4)
       if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
         iframe.classList.add("hidden");
         iframe.style.display = "none";
@@ -612,7 +596,12 @@
         if (streamSource.includes(".m3u8")) {
           if (Hls.isSupported()) {
             if (window.hlsInstance) { window.hlsInstance.destroy(); }
-            window.hlsInstance = new Hls();
+            window.hlsInstance = new Hls({
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60,
+              maxBufferSize: 30 * 1000 * 1000,
+              backBufferLength: 15
+            });
             window.hlsInstance.loadSource(proxyStreamUrl);
             window.hlsInstance.attachMedia(video);
             window.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
@@ -625,14 +614,12 @@
           video.play();
         }
       } else {
-        // Iframe Player for Vidstuck
         video.classList.add("hidden");
         video.style.display = "none";
         
         iframe.classList.remove("hidden");
         iframe.style.display = "block";
         
-        // Watermark on karein
         document.getElementById("hsWatermark").classList.remove("hidden");
 
         if (streamSource) {
@@ -640,7 +627,6 @@
         } else if (item.id) {
            iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=false&back=false`;
            
-           // SHOW 10 SECOND AD OVERLAY TO HIDE VIDSTUCK LOGO
            adOverlay.classList.remove("hidden");
            adOverlay.style.display = "flex";
            let timeLeft = 10;
@@ -651,12 +637,11 @@
              adTimerText.innerText = timeLeft;
              if (timeLeft <= 0) {
                clearInterval(adInterval);
-               adOverlay.style.display = "none"; // Hide ad after 10 sec
+               adOverlay.style.display = "none";
              }
            }, 1000);
-
         } else {
-           alert("⚠️ Automation Error: Is movie ka TMDB ID ya Stream Link available nahi hai!");
+           alert("⚠️ Automation Error: Stream link available nahi hai!");
            closePlayer();
         }
       }
@@ -671,26 +656,21 @@
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       
-      // Native player pause aur clear karein
       video.pause();
       video.src = "";
       video.classList.add("hidden");
       video.style.display = "none";
 
-      // HLS instance destroy karein
       if (window.hlsInstance) {
         window.hlsInstance.destroy();
         window.hlsInstance = null;
       }
 
-      // Iframe ko completely reset aur hide karein
       iframe.src = "about:blank";
       iframe.classList.add("hidden");
       iframe.style.display = "none";
       
-      // Watermark hide karein
       document.getElementById("hsWatermark").classList.add("hidden");
-
       document.getElementById("playerModal").classList.add("hidden");
     }
 
@@ -702,7 +682,6 @@
       }
     }
 
-    // Add Form Modals
     function openAddForm() {
       document.getElementById("addModal").classList.remove("hidden");
     }
@@ -721,12 +700,7 @@
         alert("Please provide a Title!");
         return;
       }
-      if (!streamUrl && !tmdbId) {
-        alert("Please provide either a TMDB ID (for automation) OR a Stream Link!");
-        return;
-      }
 
-      // Add newly submitted embed to the top of the grid
       const grid = document.getElementById("gridArea");
       const card = document.createElement("div");
       card.className = "card";
