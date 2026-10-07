@@ -4,7 +4,10 @@ import requests
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Browser ko local connect karne ki permission deta hai
+
+@app.route('/')
+def home():
+    return {"status": "Cynexis Backend is Live and Running!"}CORS(app)  # Browser ko local connect karne ki permission deta hai
 
 import os
 
