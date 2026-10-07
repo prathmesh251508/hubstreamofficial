@@ -7,7 +7,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return {"status": "Cynexis Backend is Live and Running!"}CORS(app)  # Browser ko local connect karne ki permission deta hai
+    return {"status": "Cynexis Backend is Live and Running!"}
+
+CORS(app) # Browser ko local connect karne ki permission deta hai
 
 import os
 
