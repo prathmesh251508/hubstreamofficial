@@ -6,7 +6,11 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Browser ko local connect karne ki permission deta hai
 
-DB_NAME = "all_world_movies.db"
+import os
+
+# Cloud aur local dono ke liye absolute path set karein
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "all_world_movies.db")
 
 # Database Initialization (Table create karega agar nahi hai toh)
 def init_db():
