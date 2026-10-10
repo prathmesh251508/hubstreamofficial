@@ -588,9 +588,9 @@
       }, 250);
     }
 
-   let adInterval = null;
+    let adInterval = null;
 
-    async function openTheater(item) {
+    function openTheater(item) {
       activeItem = item;
       document.getElementById("mTitle").innerText = item.title;
 
@@ -600,67 +600,82 @@
       const adTimerText = document.getElementById("adTimer");
       const shield = document.getElementById("clickShield");
 
+      // Reset shield on open
       shield.style.display = "block";
+
       video.pause();
       iframe.src = "about:blank";
       clearInterval(adInterval);
+      adOverlay.classList.add("hidden");
+      adOverlay.style.display = "none";
 
-      // 🕒 Show 10-second Banner Ad Overlay while extracting stream
-      adOverlay.classList.remove("hidden");
-      adOverlay.style.display = "flex";
-      let timeLeft = 10;
-      adTimerText.innerText = timeLeft;
+      const streamSource = item.streamUrl || "";
 
-      adInterval = setInterval(() => {
-        timeLeft--;
-        adTimerText.innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(adInterval);
-          adOverlay.style.display = "none";
-        }
-      }, 1000);
+      if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
+        iframe.classList.add("hidden");
+        iframe.style.display = "none";
+        
+        video.classList.remove("hidden");
+        video.style.display = "block";
 
-      let streamSource = item.streamUrl || "";
-      if (!streamSource && item.id) {
-        streamSource = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=false&back=false`;
-      }
+        const proxyStreamUrl = `${API_BASE}/stream/proxy?url=${encodeURIComponent(streamSource)}`;
 
-      let resolvedStreamUrl = "";
-
-      try {
-        if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
-          resolvedStreamUrl = streamSource;
+        if (streamSource.includes(".m3u8")) {
+          if (Hls.isSupported()) {
+            if (window.hlsInstance) { window.hlsInstance.destroy(); }
+            window.hlsInstance = new Hls({
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60,
+              maxBufferSize: 30 * 1000 * 1000,
+              backBufferLength: 15
+            });
+            window.hlsInstance.loadSource(proxyStreamUrl);
+            window.hlsInstance.attachMedia(video);
+            window.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = proxyStreamUrl;
+            video.play();
+          }
         } else {
-          // Backend Extractor call
-          const extractRes = await fetch(`${API_BASE}/stream/extract?url=${encodeURIComponent(streamSource)}`);
-          const data = await extractRes.json();
-
-          if (data.success && data.directUrl) {
-            resolvedStreamUrl = data.directUrl;
-          } else {
-            resolvedStreamUrl = "fallback_iframe";
-          }
+          video.src = proxyStreamUrl;
+          video.play();
         }
-      } catch (e) {
-        resolvedStreamUrl = "fallback_iframe";
+      } else {
+        video.classList.add("hidden");
+        video.style.display = "none";
+        
+        iframe.classList.remove("hidden");
+        iframe.style.display = "block";
+        
+        document.getElementById("hsWatermark").classList.remove("hidden");
+
+        if (streamSource) {
+           iframe.src = streamSource;
+        } else if (item.id) {
+           iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=false&back=false`;
+           
+           adOverlay.classList.remove("hidden");
+           adOverlay.style.display = "flex";
+           let timeLeft = 10;
+           adTimerText.innerText = timeLeft;
+           
+           adInterval = setInterval(() => {
+             timeLeft--;
+             adTimerText.innerText = timeLeft;
+             if (timeLeft <= 0) {
+               clearInterval(adInterval);
+               adOverlay.style.display = "none";
+             }
+           }, 1000);
+        } else {
+           alert("⚠️ Automation Error: Stream link available nahi hai!");
+           closePlayer();
+        }
       }
-
-      // Wait until the 10-sec ad timer completes before starting playback
-      const checkAdTimer = setInterval(() => {
-        if (parseInt(adTimerText.innerText) <= 0) {
-          clearInterval(checkAdTimer);
-          adOverlay.style.display = "none";
-
-          if (resolvedStreamUrl === "fallback_iframe") {
-            playIframeFallback(streamSource);
-          } else {
-            playNativeStream(resolvedStreamUrl);
-          }
-        }
-      }, 200);
 
       document.getElementById("playerModal").classList.remove("hidden");
     }
+
     function closePlayer() {
       clearInterval(adInterval);
       document.getElementById("adOverlay").style.display = "none";
