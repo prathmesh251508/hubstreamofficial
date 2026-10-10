@@ -55,7 +55,7 @@ def get_movies():
         conn.close()
         return jsonify([])
 
-# 🛠️ ADMIN DASHBOARD ROUTE
+# 🛠️ UPGRADED ADMIN DASHBOARD ROUTE (With Search & Bulk Delete)
 @app.route('/admin')
 def admin_panel():
     admin_html = """
@@ -63,12 +63,15 @@ def admin_panel():
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>HubStream Admin Panel</title>
+        <title>HubStream Advanced Admin Panel</title>
         <style>
             body { background: #050508; color: #fff; font-family: sans-serif; padding: 20px; }
-            h1 { color: #e11d48; margin-bottom: 20px; }
-            .btn { background: #e11d48; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+            h1 { color: #e11d48; margin-bottom: 15px; }
+            .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+            .btn { background: #e11d48; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
             .btn-danger { background: #ef4444; padding: 6px 12px; font-size: 12px; }
+            .btn-secondary { background: #334155; }
+            .search-box { background: #1e293b; border: 1px solid #475569; padding: 10px 16px; border-radius: 6px; color: white; width: 300px; outline: none; font-size: 13px; }
             table { width: 100%; border-collapse: collapse; background: #0f172a; border-radius: 8px; overflow: hidden; }
             th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 14px; }
             th { background: #1e293b; }
@@ -79,11 +82,20 @@ def admin_panel():
     </head>
     <body>
         <h1>HubStream Cinema - Admin Manager</h1>
-        <button class="btn" onclick="clearEmpty()">🗑️ Delete All Movies Without Links</button>
-        <div id="status" style="margin-bottom: 15px; color: #38bdf8;"></div>
+        
+        <div class="toolbar">
+            <input type="text" id="adminSearch" class="search-box" placeholder="Search loaded movies by title..." oninput="filterTable()">
+            <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
+            <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Delete Selected</button>
+            <button class="btn" onclick="clearEmpty()">🗑️ Clear All Without Links</button>
+        </div>
+
+        <div id="status" style="margin-bottom: 15px; color: #38bdf8; font-weight: bold;"></div>
+        
         <table>
             <thead>
                 <tr>
+                    <th width="40px"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
                     <th>Poster</th>
                     <th>Title</th>
                     <th>Year</th>
@@ -92,19 +104,25 @@ def admin_panel():
                 </tr>
             </thead>
             <tbody id="movieTable">
-                <tr><td colspan="5" style="text-align:center;">Loading movies...</td></tr>
+                <tr><td colspan="6" style="text-align:center;">Loading movies...</td></tr>
             </tbody>
         </table>
 
         <script>
+            let allMovies = [];
+
             async function fetchAdminMovies() {
                 const res = await fetch('/api/admin/movies');
-                const movies = await res.json();
+                allMovies = await res.json();
+                renderTable(allMovies);
+            }
+
+            function renderTable(movies) {
                 const tbody = document.getElementById('movieTable');
                 tbody.innerHTML = '';
 
                 if(movies.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No movies found in database.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No movies found.</td></tr>';
                     return;
                 }
 
@@ -112,6 +130,7 @@ def admin_panel():
                     const tr = document.createElement('tr');
                     const hasStream = m.streamUrl && m.streamUrl.trim() !== "";
                     tr.innerHTML = `
+                        <td><input type="checkbox" class="movie-checkbox" value="${m.id}"></td>
                         <td><img src="${m.poster || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=100&q=80'}" /></td>
                         <td><b>${m.title}</b><br><small style="color:#94a3b8">ID: ${m.id}</small></td>
                         <td>${m.year || 'N/A'}</td>
@@ -122,9 +141,47 @@ def admin_panel():
                 });
             }
 
+            function filterTable() {
+                const query = document.getElementById('adminSearch').value.toLowerCase();
+                const filtered = allMovies.filter(m => m.title.toLowerCase().includes(query));
+                renderTable(filtered);
+            }
+
+            function toggleSelectAll(master) {
+                const checkboxes = document.querySelectorAll('.movie-checkbox');
+                checkboxes.forEach(cb => cb.checked = master.checked);
+            }
+
+            function selectAll() {
+                const checkboxes = document.querySelectorAll('.movie-checkbox');
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+            }
+
             async function deleteMovie(id) {
                 if(!confirm("Kya aap is movie ko delete karna chahte hain?")) return;
                 const res = await fetch(`/api/movies/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                document.getElementById('status').innerText = data.message;
+                fetchAdminMovies();
+            }
+
+            async function deleteSelected() {
+                const selectedIds = Array.from(document.querySelectorAll('.movie-checkbox:checked'))
+                                         .map(cb => parseInt(cb.value));
+                
+                if(selectedIds.length === 0) {
+                    alert("Pehle koi movie select toh karo!");
+                    return;
+                }
+
+                if(!confirm(`Kya aap select ki gayi ${selectedIds.length} movies ko delete karna chahte hain?`)) return;
+
+                const res = await fetch('/api/admin/delete-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedIds })
+                });
                 const data = await res.json();
                 document.getElementById('status').innerText = data.message;
                 fetchAdminMovies();
@@ -145,7 +202,6 @@ def admin_panel():
     """
     return render_template_string(admin_html)
 
-# API to fetch all movies for admin table
 @app.route('/api/admin/movies')
 def admin_get_all_movies():
     conn = get_db_connection()
@@ -153,7 +209,6 @@ def admin_get_all_movies():
     conn.close()
     return jsonify([dict(row) for row in movies])
 
-# API to delete single movie
 @app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
 def delete_movie(movie_id):
     conn = get_db_connection()
@@ -162,7 +217,21 @@ def delete_movie(movie_id):
     conn.close()
     return jsonify({"status": "Success", "message": f"Movie ID {movie_id} successfully deleted!"})
 
-# API to delete all movies with empty streamUrl
+# API to delete multiple selected movies
+@app.route('/api/admin/delete-bulk', methods=['POST'])
+def delete_bulk_movies():
+    data = request.get_json()
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify({"status": "Error", "message": "No IDs provided"})
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.executemany('DELETE FROM movies WHERE id = ?', [(i,) for i in ids])
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "Success", "message": f"Successfully deleted {len(ids)} selected movies!"})
+
 @app.route('/api/admin/clear-empty', methods=['POST'])
 def clear_empty_movies():
     conn = get_db_connection()
