@@ -631,6 +631,7 @@
     const API_BASE = "https://hubstreamofficial.onrender.com/api";
     let searchDebounce = null;
     let activeItem = null;
+    let cachedMovies = [];
 
     // 🎨 Vibe Switcher Logic
     function toggleVibe() {
@@ -689,8 +690,9 @@
 
       try {
         const res = await fetch(url);
-        let movies = await res.json();
-        renderCatalog(movies);
+        cachedMovies = await res.json();
+        renderCatalog(cachedMovies);
+        checkUrlParamsAndPlay();
       } catch (err) {
         grid.innerHTML = `<div style="grid-column: 1/-1; color: #ef4444; padding: 20px; text-align: center;">⚠️ Backend connection error.</div>`;
       }
@@ -744,6 +746,10 @@
       activeItem = item;
       document.getElementById("mTitle").innerText = item.title;
 
+      // Update URL so refresh keeps the player open
+      const newUrl = `${window.location.pathname}?play=${item.id}`;
+      window.history.pushState({movieId: item.id}, '', newUrl);
+
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       const shield = document.getElementById("clickShield");
@@ -789,6 +795,9 @@
     }
 
     function closePlayer() {
+      // Clean up URL parameter when closing
+      window.history.pushState({}, '', window.location.pathname);
+
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       video.pause();
@@ -799,6 +808,23 @@
       iframe.classList.add("hidden");
       document.getElementById("hsWatermark").classList.add("hidden");
       document.getElementById("playerModal").classList.add("hidden");
+    }
+
+    function checkUrlParamsAndPlay() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const playId = urlParams.get('play');
+      if (playId) {
+        const found = cachedMovies.find(m => String(m.id) === String(playId));
+        if (found) {
+          openTheater(found);
+        } else {
+          // If not in cached list, fetch individual or fallback
+          fetch(`${API_BASE}/movies`).then(res => res.json()).then(movies => {
+            const m = movies.find(x => String(x.id) === String(playId));
+            if (m) openTheater(m);
+          });
+        }
+      }
     }
 
     function switchServer(num) {
@@ -822,7 +848,7 @@
       const card = document.createElement("div");
       card.className = "card";
       card.setAttribute("tabindex", "0");
-      const manualItem = { id: tmdbId, title: title, poster: poster, streamUrl: streamUrl };
+      const manualItem = { id: tmdbId || Date.now(), title: title, poster: poster, streamUrl: streamUrl };
       card.onclick = () => openTheater(manualItem);
 
       card.innerHTML = `
