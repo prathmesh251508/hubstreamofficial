@@ -444,9 +444,15 @@
           
           <div style="font-size: 20px; font-weight: 900; letter-spacing: 1px; margin-bottom: 20px;">Hub<span style="color: #e11d48;">Stream</span></div>
 
-          <div style="min-width: 300px; min-height: 250px; background: #0f172a; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-            <!-- Monetag Banner Ad Script Container -->
-            <script src="https://alwingulla.com/88/tag.min.js" data-zone="YOUR_MONETAG_ZONE_ID" async data-cfasync="false"></script>
+          <div id="monetagAdBox" style="width: 300px; height: 250px; max-width: 100%; background: #0f172a; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; overflow: hidden; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <!-- Monetag Real Ad Script -->
+            <script>
+              (function(s){
+                s.dataset.zone='12000800';
+                s.src='https://nap5k.com/tag.min.js';
+                document.getElementById('monetagAdBox').appendChild(s);
+              })(document.createElement('script'));
+            </script>
           </div>
 
           <div style="display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.2); border-radius: 30px;">
