@@ -209,7 +209,7 @@ def admin_get_all_movies():
     conn.close()
     return jsonify([dict(row) for row in movies])
 
-@app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
+@app.route('/api/movies/<int:movie_id>', methods=['DELETE', 'POST'])
 def delete_movie(movie_id):
     conn = get_db_connection()
     conn.execute('DELETE FROM movies WHERE id = ?', (movie_id,))
@@ -217,7 +217,6 @@ def delete_movie(movie_id):
     conn.close()
     return jsonify({"status": "Success", "message": f"Movie ID {movie_id} successfully deleted!"})
 
-# API to delete multiple selected movies
 @app.route('/api/admin/delete-bulk', methods=['POST'])
 def delete_bulk_movies():
     data = request.get_json()
@@ -355,8 +354,6 @@ def sync_gaiaflix_movies():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
