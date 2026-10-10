@@ -743,54 +743,72 @@
     }
 
     function openTheater(item) {
+      if (!item) return;
       activeItem = item;
-      document.getElementById("mTitle").innerText = item.title;
+      
+      const titleEl = document.getElementById("mTitle");
+      if (titleEl) titleEl.innerText = item.title || "Playing Video";
 
-      // Update URL so refresh keeps the player open
-      const newUrl = `${window.location.pathname}?play=${item.id}`;
-      window.history.pushState({movieId: item.id}, '', newUrl);
+      // Update URL safely so refresh keeps player open
+      try {
+        const newUrl = `${window.location.pathname}?play=${item.id || ''}`;
+        window.history.pushState({movieId: item.id}, '', newUrl);
+      } catch (e) {
+        console.log("History state error:", e);
+      }
 
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       const shield = document.getElementById("clickShield");
       
-      shield.style.display = "block";
-      shield.style.pointerEvents = "auto";
-      video.pause();
-      iframe.src = "about:blank";
+      if (shield) {
+        shield.style.display = "block";
+        shield.style.pointerEvents = "auto";
+      }
+      if (video) {
+        video.pause();
+        video.classList.add("hidden");
+      }
+      if (iframe) {
+        iframe.src = "about:blank";
+        iframe.classList.remove("hidden");
+      }
 
       const streamSource = item.streamUrl || "";
 
       if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
-        iframe.classList.add("hidden");
-        video.classList.remove("hidden");
+        if (iframe) iframe.classList.add("hidden");
+        if (video) video.classList.remove("hidden");
         const proxyStreamUrl = `${API_BASE}/stream/proxy?url=${encodeURIComponent(streamSource)}`;
 
-        if (streamSource.includes(".m3u8") && Hls.isSupported()) {
+        if (streamSource.includes(".m3u8") && typeof Hls !== 'undefined' && Hls.isSupported()) {
           if (window.hlsInstance) window.hlsInstance.destroy();
           window.hlsInstance = new Hls();
           window.hlsInstance.loadSource(proxyStreamUrl);
           window.hlsInstance.attachMedia(video);
           window.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-        } else {
+        } else if (video) {
           video.src = proxyStreamUrl;
           video.play();
         }
       } else {
-        video.classList.add("hidden");
-        iframe.classList.remove("hidden");
-        document.getElementById("hsWatermark").classList.remove("hidden");
+        const watermark = document.getElementById("hsWatermark");
+        if (watermark) watermark.classList.remove("hidden");
 
-        if (streamSource) {
+        if (streamSource && iframe) {
            iframe.src = streamSource;
-        } else if (item.id) {
+        } else if (item.id && iframe) {
            iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=true&back=false`;
         }
       }
 
-      document.getElementById("playerModal").classList.remove("hidden");
+      const modal = document.getElementById("playerModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+      }
       setTimeout(() => {
-        document.getElementById("closePlayerBtn").focus();
+        const closeBtn = document.getElementById("closePlayerBtn");
+        if (closeBtn) closeBtn.focus();
       }, 200);
     }
 
