@@ -41,12 +41,12 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# 1. Home page ke liye sirf WORKING movies filter karke bhejna (Jiska streamUrl ho)
+# 1. Home page ke liye popular/latest movies return karna
 @app.route('/api/movies')
 def get_movies():
     conn = get_db_connection()
-    # Sirf wahi movies aayengi jinka streamUrl khali nahi hai
-    movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
+    # SELECT * karne se id, title, poster sab frontend ko jayega[cite: 5]
+    movies = conn.execute('SELECT * FROM movies ORDER BY id DESC').fetchall()
     conn.close()
     return jsonify([dict(row) for row in movies])
 
