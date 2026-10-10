@@ -41,14 +41,28 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# 1. Home page ke liye popular/latest movies return karna
+# 🚀 Smart Error-Free Working Movies Route
 @app.route('/api/movies')
 def get_movies():
     conn = get_db_connection()
-    # SELECT * karne se id, title, poster sab frontend ko jayega[cite: 5]
-    movies = conn.execute('SELECT * FROM movies ORDER BY id DESC').fetchall()
-    conn.close()
-    return jsonify([dict(row) for row in movies])
+    try:
+        # Pehle check karein ki kya koi working stream wali movie database me hai
+        working_movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
+        
+        # Agar working movies milti hain, toh sirf wahi bhejenge
+        if working_movies:
+            movies_list = [dict(row) for row in working_movies]
+        else:
+            # Agar ek bhi working stream wali movie nahi hai, toh fallback ke liye 
+            # sari movies bhej denge taaki homepage khali ya error-prone na lage
+            all_movies = conn.execute('SELECT * FROM movies ORDER BY id DESC LIMIT 50').fetchall()
+            movies_list = [dict(row) for row in all_movies]
+            
+        conn.close()
+        return jsonify(movies_list)
+    except Exception as e:
+        conn.close()
+        return jsonify([])
 
 @app.route('/api/search')
 def search_movies():
