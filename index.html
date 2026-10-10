@@ -5,6 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HubStream Cinema - Pure Embedded Player</title>
+  
+  <!-- 🛡️ Global Window Open & Redirect Blocker Script -->
+  <script>
+    window.open = function(url) {
+        console.warn("🚫 Blocked unwanted redirect/popup to:", url);
+        return null;
+    };
+
+    const originalLocation = window.location.href;
+    setInterval(() => {
+        if (window.location.href !== originalLocation && !window.location.href.includes("#")) {
+            window.location.href = originalLocation;
+        }
+    }, 500);
+  </script>
+
   <style>
     * {
       margin: 0;
@@ -417,7 +433,11 @@
       <div class="screen-stage" style="position: relative;">
         
         <!-- CLICK INTERCEPTOR OVERLAY -->
-        <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="this.style.display='none'"></div>
+        <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="
+          // Pehli click ko yahan absorb kar lo taaki main redirect trigger na ho
+          this.style.pointerEvents = 'none';
+          setTimeout(() => { this.style.display = 'none'; }, 500);
+        "></div>
 
         <!-- HubStream 10-Sec Ad/Intro Overlay -->
         <div id="adOverlay" class="hidden" style="position: absolute; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px); z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center;">
@@ -438,7 +458,7 @@
 
         </div>
 
-        <!-- iFrame (Sandbox removed to fix detection errors) -->
+        <!-- iFrame (Sandbox removed to prevent detection errors) -->
         <iframe 
           id="embedPlayer" 
           src="" 
@@ -493,6 +513,13 @@
     const API_BASE = "https://hubstreamofficial.onrender.com/api";
     let searchDebounce = null;
     let activeItem = null;
+
+    // Focus/Blur Shield to pull user back if iframe tries to pop or redirect
+    window.addEventListener('blur', () => {
+        setTimeout(() => {
+            window.focus();
+        }, 100);
+    });
 
     async function fetchMovies(query = "") {
       const grid = document.getElementById("gridArea");
@@ -561,9 +588,9 @@
       }, 250);
     }
 
-    let adInterval = null;
+   let adInterval = null;
 
-    function openTheater(item) {
+    async function openTheater(item) {
       activeItem = item;
       document.getElementById("mTitle").innerText = item.title;
 
@@ -573,82 +600,67 @@
       const adTimerText = document.getElementById("adTimer");
       const shield = document.getElementById("clickShield");
 
-      // Reset shield on open
       shield.style.display = "block";
-
       video.pause();
       iframe.src = "about:blank";
       clearInterval(adInterval);
-      adOverlay.classList.add("hidden");
-      adOverlay.style.display = "none";
 
-      const streamSource = item.streamUrl || "";
+      // 🕒 Show 10-second Banner Ad Overlay while extracting stream
+      adOverlay.classList.remove("hidden");
+      adOverlay.style.display = "flex";
+      let timeLeft = 10;
+      adTimerText.innerText = timeLeft;
 
-      if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
-        iframe.classList.add("hidden");
-        iframe.style.display = "none";
-        
-        video.classList.remove("hidden");
-        video.style.display = "block";
-
-        const proxyStreamUrl = `${API_BASE}/stream/proxy?url=${encodeURIComponent(streamSource)}`;
-
-        if (streamSource.includes(".m3u8")) {
-          if (Hls.isSupported()) {
-            if (window.hlsInstance) { window.hlsInstance.destroy(); }
-            window.hlsInstance = new Hls({
-              maxBufferLength: 30,
-              maxMaxBufferLength: 60,
-              maxBufferSize: 30 * 1000 * 1000,
-              backBufferLength: 15
-            });
-            window.hlsInstance.loadSource(proxyStreamUrl);
-            window.hlsInstance.attachMedia(video);
-            window.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = proxyStreamUrl;
-            video.play();
-          }
-        } else {
-          video.src = proxyStreamUrl;
-          video.play();
+      adInterval = setInterval(() => {
+        timeLeft--;
+        adTimerText.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(adInterval);
+          adOverlay.style.display = "none";
         }
-      } else {
-        video.classList.add("hidden");
-        video.style.display = "none";
-        
-        iframe.classList.remove("hidden");
-        iframe.style.display = "block";
-        
-        document.getElementById("hsWatermark").classList.remove("hidden");
+      }, 1000);
 
-        if (streamSource) {
-           iframe.src = streamSource;
-        } else if (item.id) {
-           iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=false&back=false`;
-           
-           adOverlay.classList.remove("hidden");
-           adOverlay.style.display = "flex";
-           let timeLeft = 10;
-           adTimerText.innerText = timeLeft;
-           
-           adInterval = setInterval(() => {
-             timeLeft--;
-             adTimerText.innerText = timeLeft;
-             if (timeLeft <= 0) {
-               clearInterval(adInterval);
-               adOverlay.style.display = "none";
-             }
-           }, 1000);
-        } else {
-           alert("⚠️ Automation Error: Stream link available nahi hai!");
-           closePlayer();
-        }
+      let streamSource = item.streamUrl || "";
+      if (!streamSource && item.id) {
+        streamSource = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=false&back=false`;
       }
+
+      let resolvedStreamUrl = "";
+
+      try {
+        if (streamSource.includes(".m3u8") || streamSource.endsWith(".mp4")) {
+          resolvedStreamUrl = streamSource;
+        } else {
+          // Backend Extractor call
+          const extractRes = await fetch(`${API_BASE}/stream/extract?url=${encodeURIComponent(streamSource)}`);
+          const data = await extractRes.json();
+
+          if (data.success && data.directUrl) {
+            resolvedStreamUrl = data.directUrl;
+          } else {
+            resolvedStreamUrl = "fallback_iframe";
+          }
+        }
+      } catch (e) {
+        resolvedStreamUrl = "fallback_iframe";
+      }
+
+      // Wait until the 10-sec ad timer completes before starting playback
+      const checkAdTimer = setInterval(() => {
+        if (parseInt(adTimerText.innerText) <= 0) {
+          clearInterval(checkAdTimer);
+          adOverlay.style.display = "none";
+
+          if (resolvedStreamUrl === "fallback_iframe") {
+            playIframeFallback(streamSource);
+          } else {
+            playNativeStream(resolvedStreamUrl);
+          }
+        }
+      }, 200);
 
       document.getElementById("playerModal").classList.remove("hidden");
     }
-
     function closePlayer() {
       clearInterval(adInterval);
       document.getElementById("adOverlay").style.display = "none";
