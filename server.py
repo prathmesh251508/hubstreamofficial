@@ -9,15 +9,15 @@ app = Flask(__name__)
 def home():
     return {"status": "Cynexis Backend is Live and Running!"}
 
-CORS(app) # Browser ko local connect karne ki permission deta hai
+CORS(app) # Browser ko local connect karne ki permission deta hai[cite: 5]
 
 import os
 
-# Cloud aur local dono ke liye absolute path set karein
+# Cloud aur local dono ke liye absolute path set karein[cite: 5]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, "all_world_movies.db")
 
-# Database Initialization (Table create karega agar nahi hai toh)
+# Database Initialization (Table create karega agar nahi hai toh)[cite: 5]
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -41,12 +41,12 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# 1. Home page ke liye popular/latest 50 movies
+# 1. Home page ke liye sirf WORKING movies filter karke bhejna (Jiska streamUrl ho)
 @app.route('/api/movies')
 def get_movies():
     conn = get_db_connection()
-    # SELECT * karne se id, title, poster sab frontend ko jayega
-    movies = conn.execute('SELECT * FROM movies ORDER BY id DESC').fetchall()
+    # Sirf wahi movies aayengi jinka streamUrl khali nahi hai
+    movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
     conn.close()
     return jsonify([dict(row) for row in movies])
 
@@ -56,7 +56,7 @@ def search_movies():
     if not query:
         return jsonify([])
 
-    # 1. TMDB API se live search karein
+    # 1. TMDB API se live search karein[cite: 5]
     url = f"https://api.themoviedb.org/3/search/movie?query={query}&include_adult=false&language=en-US&page=1&api_key=16f62d38fec24f4e6c2adc9388da20ce"
     
     try:
@@ -81,11 +81,11 @@ def search_movies():
             
             rating = round(m.get("vote_average", 0), 1)
             
-            # Check karein agar movie pehle se database me hai
+            # Check karein agar movie pehle se database me hai[cite: 5]
             existing = cursor.execute("SELECT * FROM movies WHERE id=?", (tmdb_id,)).fetchone()
             
             if not existing:
-                # Agar nahi hai toh DB me nayi movie save karein
+                # Agar nahi hai toh DB me nayi movie save karein[cite: 5]
                 cursor.execute("""
                     INSERT INTO movies (id, title, poster, streamUrl, year, rating) 
                     VALUES (?, ?, ?, ?, ?, ?)
@@ -95,7 +95,7 @@ def search_movies():
                     "streamUrl": "", "year": year, "rating": rating
                 })
             else:
-                # Agar pehle se hai toh directly list me daal dein
+                # Agar pehle se hai toh directly list me daal dein[cite: 5]
                 search_results.append(dict(existing))
                 
         conn.commit()
@@ -104,7 +104,7 @@ def search_movies():
         return jsonify(search_results)
         
     except Exception as e:
-        # Agar net band ho toh purane database me search kare
+        # Agar net band ho toh purane database me search kare[cite: 5]
         conn = get_db_connection()
         movies = conn.execute('SELECT * FROM movies WHERE title LIKE ? ORDER BY id DESC', ('%' + query + '%',)).fetchall()
         conn.close()
@@ -138,8 +138,6 @@ def sync_gaiaflix_movies():
         added_count = 0
         total_fetched = 0
         
-        # Hum 1 se lekar 5 pages tak loop chalayenge (5 pages x 20 = 100 movies)
-        # Agar aapko aur zyada chahiye, toh (1, 6) ko (1, 11) kar dein (10 pages ke liye)
         for page_num in range(1, 6):
             url = f"https://api.themoviedb.org/3/discover/movie?language=en-US&page={page_num}&sort_by=popularity.desc&include_adult=false&without_genres=16&api_key=16f62d38fec24f4e6c2adc9388da20ce"
             
