@@ -27,7 +27,7 @@
       --bg-color: #050508;
       --card-bg: rgba(18, 18, 26, 0.75);
       --accent-color: #e11d48;
-      --tv-focus-color: #38bdf8; /* Bright cyan focus ring for TV Remotes */
+      --tv-focus-color: #38bdf8;
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
     }
@@ -63,14 +63,22 @@
       width: 100%;
     }
 
-    .brand-title {
-      font-size: clamp(20px, 4vw, 26px);
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      white-space: nowrap;
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
     }
 
-    .brand-title span {
+    .brand-name {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-name span {
       color: var(--accent-color);
     }
 
@@ -110,7 +118,6 @@
       white-space: nowrap;
     }
 
-    /* 📺 Android TV Remote Focus Styles */
     button:focus, input:focus, .card:focus {
       outline: 3px solid var(--tv-focus-color) !important;
       outline-offset: 3px;
@@ -120,7 +127,6 @@
       transform: scale(1.05);
     }
 
-    /* Main Container & Fluid Grid */
     .catalog-wrapper {
       max-width: 1500px;
       margin: 0 auto;
@@ -149,7 +155,6 @@
       color: #e2e8f0;
     }
 
-    /* 📱💻📺 Fluid Grid for TVs, PCs, and Mobiles */
     .media-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -168,7 +173,6 @@
       }
     }
 
-    /* Movie Poster Card */
     .card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -179,7 +183,6 @@
       position: relative;
     }
 
-    /* TV Remote D-Pad Focus State for Cards */
     .card:hover, .card:focus {
       transform: translateY(-8px) scale(1.03);
       border-color: var(--tv-focus-color);
@@ -253,7 +256,6 @@
       color: var(--text-muted);
     }
 
-    /* Modal Theater Overlay */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -375,7 +377,6 @@
       color: white;
     }
 
-    /* Form Modal */
     .form-box {
       background: #0f172a;
       border: 1px solid #1e293b;
@@ -441,9 +442,17 @@
 </head>
 <body>
 
-  <!-- Top Navbar -->
+  <!-- Top Navbar with Embedded Logo -->
   <header>
-    <div class="brand-title">Hub<span>Stream</span> Cinema</div>
+    <a href="/" class="brand-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#e11d48" stroke-width="2" fill="#0b1120"/>
+        <circle cx="16" cy="16" r="5" fill="#e11d48"/>
+        <rect x="14" y="5" width="4" height="6" rx="2" fill="#e11d48"/>
+        <rect x="14" y="21" width="4" height="6" rx="2" fill="#e11d48"/>
+      </svg>
+      <div class="brand-name">Hub<span>Stream</span></div>
+    </a>
     <div class="header-controls">
       <input type="text" id="searchInput" class="search-input" placeholder="Search title..." oninput="handleSearch()">
       <button class="btn-add" onclick="openAddForm()">+ Add</button>
@@ -601,13 +610,12 @@
         return;
       }
 
-      filteredItems.forEach((item, index) => {
+      filteredItems.forEach((item) => {
         const card = document.createElement("div");
         card.className = "card";
-        card.setAttribute("tabindex", "0"); // 📺 Enables Android TV Remote Focus Navigation
+        card.setAttribute("tabindex", "0");
         card.onclick = () => openTheater(item);
 
-        // Allow pressing 'Enter' or 'OK' button on TV Remote to open movie
         card.onkeydown = (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -678,8 +686,6 @@
       }
 
       document.getElementById("playerModal").classList.remove("hidden");
-      
-      // Focus close button on TV remote when player opens
       setTimeout(() => {
         document.getElementById("closePlayerBtn").focus();
       }, 200);
