@@ -74,12 +74,13 @@
     .brand-name {
       font-size: clamp(20px, 4vw, 26px);
       font-weight: 900;
-      color: #fff;
       letter-spacing: -0.5px;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
     }
 
     .brand-name span {
-      color: var(--accent-color);
+      color: #38bdf8;
     }
 
     .header-controls {
@@ -442,14 +443,22 @@
 </head>
 <body>
 
-  <!-- Top Navbar with Embedded Logo -->
+  <!-- Top Navbar with Clean RGB Glowing Logo -->
   <header>
     <a href="/" class="brand-logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="15" stroke="#e11d48" stroke-width="2" fill="#0b1120"/>
-        <circle cx="16" cy="16" r="5" fill="#e11d48"/>
-        <rect x="14" y="5" width="4" height="6" rx="2" fill="#e11d48"/>
-        <rect x="14" y="21" width="4" height="6" rx="2" fill="#e11d48"/>
+      <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));">
+        <defs>
+          <linearGradient id="rgbGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff0055"/>
+            <stop offset="33%" stop-color="#00ff66"/>
+            <stop offset="66%" stop-color="#00ffff"/>
+            <stop offset="100%" stop-color="#cc00ff"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="15" stroke="url(#rgbGlow)" stroke-width="2.5" fill="#0b1120"/>
+        <circle cx="16" cy="16" r="5" fill="url(#rgbGlow)"/>
+        <rect x="14" y="5" width="4" height="6" rx="2" fill="url(#rgbGlow)"/>
+        <rect x="14" y="21" width="4" height="6" rx="2" fill="url(#rgbGlow)"/>
       </svg>
       <div class="brand-name">Hub<span>Stream</span></div>
     </a>
