@@ -41,19 +41,14 @@ def get_db_connection():
 
 @app.route('/api/movies')
 def get_movies():
-    category = request.args.get('category', '')
     conn = get_db_connection()
     try:
-        if category == 'anime':
-            movies = conn.execute("SELECT * FROM movies WHERE title LIKE '%Anime%' OR title LIKE '%Naruto%' OR title LIKE '%One Piece%' OR title LIKE '%Dragon Ball%' ORDER BY id DESC").fetchall()
-            movies_list = [dict(row) for row in movies]
+        working_movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
+        if working_movies:
+            movies_list = [dict(row) for row in working_movies]
         else:
-            working_movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
-            if working_movies:
-                movies_list = [dict(row) for row in working_movies]
-            else:
-                all_movies = conn.execute('SELECT * FROM movies ORDER BY id DESC LIMIT 50').fetchall()
-                movies_list = [dict(row) for row in all_movies]
+            all_movies = conn.execute('SELECT * FROM movies ORDER BY id DESC LIMIT 50').fetchall()
+            movies_list = [dict(row) for row in all_movies]
         conn.close()
         return jsonify(movies_list)
     except Exception as e:
@@ -355,6 +350,50 @@ def sync_gaiaflix_movies():
         return jsonify({
             "status": "Success", 
             "message": f"{added_count} new movies synced! (Total fetched from TMDB: {total_fetched})"
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# 🌟 Naya Anime Sync Route (Sirf Pure Anime ke liye)
+@app.route('/api/sync-anime-only')
+def sync_anime_only():
+    try:
+        conn = get_db_connection()
+        added_count = 0
+        total_fetched = 0
+        
+        for page_num in range(1, 6):
+            url = f"https://api.themoviedb.org/3/discover/movie?language=en-US&with_genres=16&with_original_language=ja&page={page_num}&sort_by=popularity.desc&include_adult=false&api_key=16f62d38fec24f4e6c2adc9388da20ce"
+            
+            response = requests.get(url, timeout=10)
+            data = response.json()
+            movies_list = data.get("results", [])
+            total_fetched += len(movies_list)
+            
+            for m in movies_list:
+                tmdb_id = m.get("id")
+                title = m.get("title")
+                poster_path = m.get("poster_path")
+                poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else ""
+                release_date = m.get("release_date", "")
+                year = release_date.split("-")[0] if release_date else ""
+                rating = round(m.get("vote_average", 0), 1)
+                
+                existing = conn.execute("SELECT id FROM movies WHERE id=?", (tmdb_id,)).fetchone()
+                if not existing:
+                    conn.execute("""
+                        INSERT INTO movies (id, title, poster, streamUrl, year, rating) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (tmdb_id, title, poster, "", year, rating))
+                    added_count += 1
+                    
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "status": "Success", 
+            "message": f"Total {added_count} pure anime items synced successfully! (Total fetched: {total_fetched})"
         })
         
     except Exception as e:
