@@ -41,14 +41,19 @@ def get_db_connection():
 
 @app.route('/api/movies')
 def get_movies():
+    category = request.args.get('category', '')
     conn = get_db_connection()
     try:
-        working_movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
-        if working_movies:
-            movies_list = [dict(row) for row in working_movies]
+        if category == 'anime':
+            movies = conn.execute("SELECT * FROM movies WHERE title LIKE '%Anime%' OR title LIKE '%Naruto%' OR title LIKE '%One Piece%' OR title LIKE '%Dragon Ball%' ORDER BY id DESC").fetchall()
+            movies_list = [dict(row) for row in movies]
         else:
-            all_movies = conn.execute('SELECT * FROM movies ORDER BY id DESC LIMIT 50').fetchall()
-            movies_list = [dict(row) for row in all_movies]
+            working_movies = conn.execute("SELECT * FROM movies WHERE streamUrl IS NOT NULL AND streamUrl != '' ORDER BY id DESC").fetchall()
+            if working_movies:
+                movies_list = [dict(row) for row in working_movies]
+            else:
+                all_movies = conn.execute('SELECT * FROM movies ORDER BY id DESC LIMIT 50').fetchall()
+                movies_list = [dict(row) for row in all_movies]
         conn.close()
         return jsonify(movies_list)
     except Exception as e:
