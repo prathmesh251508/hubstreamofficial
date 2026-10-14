@@ -512,6 +512,13 @@
       </div>
 
       <div class="screen-stage">
+        <!-- Timed In-Player Display Banner Ad (Triggers every 40 mins) -->
+        <div id="timedPlayerAd" class="hidden" style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 35; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.15); padding: 12px 18px; border-radius: 8px; max-width: 460px; width: 90%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.8);">
+          <div style="font-size: 11px; color: #94a3b8;">Sponsored Display</div>
+          <div style="font-size: 13px; font-weight: bold; color: #38bdf8;">HubStream Partner Ad</div>
+          <button onclick="document.getElementById('timedPlayerAd').classList.add('hidden')" style="background:none; border:none; color:#fff; cursor:pointer; font-size:14px;">✕</button>
+        </div>
+
         <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="
           this.style.pointerEvents = 'none';
           setTimeout(() => { this.style.display = 'none'; }, 500);
@@ -574,6 +581,7 @@
     const API_BASE = "https://hubstreamofficial.onrender.com/api";
     let searchDebounce = null;
     let activeItem = null;
+    let playerAdInterval = null;
 
     // --- SERVER-SYNCED GLOBAL MAINTENANCE MODE SYSTEM ---
     window.addEventListener('DOMContentLoaded', async () => {
@@ -680,6 +688,32 @@
       }
     }
     // ------------------------------------------------------------------
+
+    function startPlayerAdTimer() {
+      if (playerAdInterval) clearInterval(playerAdInterval);
+      // 40 Minutes in milliseconds (40 * 60 * 1000)
+      const AD_FREQUENCY_MS = 40 * 60 * 1000; 
+
+      playerAdInterval = setInterval(() => {
+        const adBox = document.getElementById("timedPlayerAd");
+        if (adBox) {
+          adBox.classList.remove("hidden");
+          // Auto hide after 20 seconds
+          setTimeout(() => {
+            adBox.classList.add("hidden");
+          }, 20000);
+        }
+      }, AD_FREQUENCY_MS);
+    }
+
+    function stopPlayerAdTimer() {
+      if (playerAdInterval) {
+        clearInterval(playerAdInterval);
+        playerAdInterval = null;
+      }
+      const adBox = document.getElementById("timedPlayerAd");
+      if (adBox) adBox.classList.add("hidden");
+    }
 
     function checkProAccess() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -801,12 +835,14 @@
       }
 
       document.getElementById("playerModal").classList.remove("hidden");
+      startPlayerAdTimer(); // Start 40-min ad timer when player opens
       setTimeout(() => {
         document.getElementById("closePlayerBtn").focus();
       }, 200);
     }
 
     function closePlayer() {
+      stopPlayerAdTimer(); // Stop timer when player closes
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       video.pause();
