@@ -692,7 +692,7 @@
     function startPlayerAdTimer() {
       if (playerAdInterval) clearInterval(playerAdInterval);
       // 40 Minutes in milliseconds (40 * 60 * 1000)
-      const AD_FREQUENCY_MS = 40 * 60 * 1000; 
+      const AD_FREQUENCY_MS = 10 * 1000; // Sirf 10 seconds mein test karne ke liye 
 
       playerAdInterval = setInterval(() => {
         const adBox = document.getElementById("timedPlayerAd");
