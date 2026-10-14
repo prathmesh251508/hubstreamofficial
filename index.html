@@ -690,15 +690,7 @@
         if (streamSource) {
            iframe.src = streamSource;
         } else if (item.id) {
-           // 🚀 Universal Player Integration (Anime/Series use TV endpoint, Movies use movie endpoint)
-           const titleLower = (item.title || "").toLowerCase();
-           const isAnimeOrSeries = titleLower.includes('naruto') || titleLower.includes('one piece') || titleLower.includes('dragon ball') || titleLower.includes('attack on titan') || titleLower.includes('anime');
-           
-           if (isAnimeOrSeries) {
-               iframe.src = `https://vidsrc.cc/v2/embed/tv/${item.id}`;
-           } else {
-               iframe.src = `https://vidsrc.cc/v2/embed/movie/${item.id}`;
-           }
+           iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=true&back=false`;
         }
       }
 
