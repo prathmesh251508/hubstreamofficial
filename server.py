@@ -2,6 +2,7 @@ import sqlite3
 from flask import Flask, jsonify, request, Response, render_template_string
 import requests
 from flask_cors import CORS
+import time
 
 app = Flask(__name__)
 
@@ -15,6 +16,12 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, "all_world_movies.db")
+
+# Global maintenance state dictionary
+MAINTENANCE_MODE = {
+    "active": False,
+    "start_time": None
+}
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
@@ -38,6 +45,28 @@ def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
+
+# --- SERVER-SIDE MAINTENANCE ROUTES ---
+@app.route('/api/maintenance/status', methods=['GET'])
+def get_maintenance_status():
+    return jsonify(MAINTENANCE_MODE)
+
+@app.route('/api/maintenance/toggle', methods=['POST'])
+def toggle_maintenance():
+    data = request.get_json() or {}
+    key = data.get('key')
+    
+    if key != "HUBSTREAM-VIP-2026-SECURE":
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    MAINTENANCE_MODE["active"] = not MAINTENANCE_MODE["active"]
+    if MAINTENANCE_MODE["active"]:
+        MAINTENANCE_MODE["start_time"] = int(time.time() * 1000)
+    else:
+        MAINTENANCE_MODE["start_time"] = None
+        
+    return jsonify({"success": True, "active": MAINTENANCE_MODE["active"]})
+# -------------------------------------
 
 @app.route('/api/movies')
 def get_movies():
