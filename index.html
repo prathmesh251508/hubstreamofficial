@@ -106,6 +106,19 @@
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
     }
 
+    .btn-key-pass {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
     .btn-add {
       background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
       color: white;
@@ -443,7 +456,7 @@
 </head>
 <body>
 
-  <!-- Top Navbar with Clean RGB Glowing Logo -->
+  <!-- Top Navbar -->
   <header>
     <a href="/" class="brand-logo">
       <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));">
@@ -463,6 +476,7 @@
       <div class="brand-name">Hub<span>Stream</span></div>
     </a>
     <div class="header-controls">
+      <button class="btn-key-pass" onclick="openAroLinksKeyPage()">🔑 Get 24H Key</button>
       <input type="text" id="searchInput" class="search-input" placeholder="Search title..." oninput="handleSearch()">
       <button class="btn-add" onclick="openAddForm()">+ Add</button>
     </div>
@@ -487,6 +501,15 @@
     <div class="media-grid" id="gridArea"></div>
   </main>
 
+  <!-- 24H LOCK MODAL -->
+  <div id="keyLockModal" class="modal-overlay hidden">
+    <div class="form-box" style="text-align: center; max-width: 400px;">
+      <div style="font-size: 24px; font-weight: 900; color: #ffffff; margin-bottom: 10px;">🔒 24H Access Required</div>
+      <p style="font-size: 13px; color: #9ca3af; line-height: 1.6; margin-bottom: 25px;">Aapka 24-hour free streaming pass expire ho chuka hai. Continue karne ke liye naya key generate karein!</p>
+      <button class="btn-submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="openAroLinksKeyPage()">🚀 Generate 24H Pass via AroLinks</button>
+    </div>
+  </div>
+
   <!-- EMBEDDED THEATER PLAYER -->
   <div id="playerModal" class="modal-overlay hidden">
     <div class="side-ad-box" id="leftAdBox">
@@ -506,7 +529,7 @@
       <div class="cinema-topbar">
         <div>
           <strong id="mTitle" style="font-size: 14px;">Playing Video</strong>
-          <span style="font-size: 11px; color: #10b981; margin-left: 8px;" id="adShieldStatus">● Ad-Shield Active</span>
+          <span style="font-size: 11px; color: #10b981; margin-left: 8px;" id="adShieldStatus">● 24H Pass Active</span>
         </div>
         <button class="close-btn" id="closePlayerBtn" onclick="closePlayer()">✕</button>
       </div>
@@ -528,7 +551,7 @@
           <button class="server-pill active" onclick="switchServer(1)">Main</button>
           <button class="server-pill" onclick="switchServer(2)">Backup</button>
         </div>
-        <div style="font-size: 11px; color: #64748b;" id="modeText">Zero Redirect Mode</div>
+        <div style="font-size: 11px; color: #64748b;" id="modeText">AroLinks Protected Mode</div>
       </div>
     </div>
 
@@ -572,12 +595,22 @@
 
   <script>
     const API_BASE = "https://hubstreamofficial.onrender.com/api";
+    const AROLINKS_KEY_URL = "https://arolinks.com/YOUR_AROLINKS_ID"; // Yahan apna AroLinks URL daalna
     let searchDebounce = null;
     let activeItem = null;
     let playerAdInterval = null;
 
     // --- SERVER-SYNCED GLOBAL MAINTENANCE MODE SYSTEM ---
     window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('pass') === 'active' || urlParams.get('verify') === 'true') {
+        const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+        localStorage.setItem('hubstream_24h_expiry', expiryTime);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      check24HourAccess();
+
       try {
         const res = await fetch(`${API_BASE}/maintenance/status`);
         const status = await res.json();
@@ -588,6 +621,22 @@
         console.error("Failed to check maintenance status");
       }
     });
+
+    function check24HourAccess() {
+      const storedExpiry = localStorage.getItem('hubstream_24h_expiry');
+      const now = new Date().getTime();
+
+      if (!storedExpiry || now > parseInt(storedExpiry)) {
+        document.getElementById("keyLockModal").classList.remove("hidden");
+      } else {
+        document.getElementById("keyLockModal").classList.add("hidden");
+      }
+    }
+
+    function openAroLinksKeyPage() {
+      const redirectBack = encodeURIComponent(window.location.origin + window.location.pathname + "?pass=active");
+      window.location.href = `${AROLINKS_KEY_URL}?api_url=${redirectBack}`;
+    }
 
     window.addEventListener('keydown', async (e) => {
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'm') {
@@ -685,12 +734,10 @@
     function startPlayerAdTimer() {
       if (playerAdInterval) clearInterval(playerAdInterval);
       
-      // NOTE: Testing ke liye abhi 10 seconds (10000 ms) rakha hai. 
-      // Bad mein ise 40 minutes karne ke liye: 40 * 60 * 1000 kar dena.
-      const AD_FREQUENCY_MS = 10 * 1000; 
+      // 40 Minutes Timer for Ad/Redirect
+      const AD_FREQUENCY_MS = 40 * 60 * 1000; 
 
       playerAdInterval = setInterval(() => {
-        // Timed Ad Trigger / Redirect Link
         window.location.href = "https://conventionalresponse.com/bQXwVWsyd.G/ld0/YPWfcy/CeNmt9SutZ/Ukl/kKPJTicS1kMPDtc/3DM_D/UKt_NTzbUawfNFzqcUwPORQH";
       }, AD_FREQUENCY_MS);
     }
@@ -699,26 +746,6 @@
       if (playerAdInterval) {
         clearInterval(playerAdInterval);
         playerAdInterval = null;
-      }
-    }
-
-    function checkProAccess() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isProParam = urlParams.get('pro') === 'true' || urlParams.get('vip') === 'true';
-      const now = new Date().getTime();
-
-      if (isProParam) {
-        localStorage.setItem('hubstream_pro_expiry', now + (24 * 60 * 60 * 1000));
-      }
-
-      const storedExpiry = localStorage.getItem('hubstream_pro_expiry');
-      if (storedExpiry && now < parseInt(storedExpiry)) {
-        document.querySelectorAll('.homepage-banner-box, .side-ad-box').forEach(box => box.remove());
-        const statusEl = document.getElementById('adShieldStatus');
-        if(statusEl) {
-          statusEl.innerText = '● VIP Pro Active';
-          statusEl.style.color = '#38bdf8';
-        }
       }
     }
 
@@ -780,6 +807,13 @@
     }
 
     function openTheater(item) {
+      const storedExpiry = localStorage.getItem('hubstream_24h_expiry');
+      const now = new Date().getTime();
+      if (!storedExpiry || now > parseInt(storedExpiry)) {
+        document.getElementById("keyLockModal").classList.remove("hidden");
+        return;
+      }
+
       activeItem = item;
       document.getElementById("mTitle").innerText = item.title;
 
@@ -822,14 +856,14 @@
       }
 
       document.getElementById("playerModal").classList.remove("hidden");
-      startPlayerAdTimer(); // Timer start ho gaya!
+      startPlayerAdTimer();
       setTimeout(() => {
         document.getElementById("closePlayerBtn").focus();
       }, 200);
     }
 
     function closePlayer() {
-      stopPlayerAdTimer(); // Timer stop ho gaya!
+      stopPlayerAdTimer();
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       video.pause();
@@ -881,7 +915,7 @@
     }
 
     window.onload = () => {
-      checkProAccess();
+      check24HourAccess();
       fetchMovies();
     };
   </script>
