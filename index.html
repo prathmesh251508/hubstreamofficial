@@ -48,39 +48,75 @@
       overflow-x: hidden;
     }
 
-    /* Universal Responsive Header */
+    /* GaiaFlix Style Floating Pill Header CSS */
     header {
-      background: rgba(10, 10, 15, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       position: sticky;
       top: 0;
       z-index: 1000;
       width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 16px 20px;
+      background: linear-gradient(to bottom, rgba(5,5,8,0.9), transparent);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-pill-container {
+      background: rgba(18, 18, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 40px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      max-width: 1000px;
+      width: 100%;
+      justify-content: space-between;
+      overflow-x: auto;
     }
 
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
       text-decoration: none;
+      white-space: nowrap;
     }
 
     .brand-name {
-      font-size: clamp(20px, 4vw, 26px);
+      font-size: 18px;
       font-weight: 900;
       letter-spacing: -0.5px;
       color: #ffffff;
-      text-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
     }
 
     .brand-name span {
       color: #38bdf8;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-links a.active, .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
     }
 
     .header-controls {
@@ -92,11 +128,11 @@
     .search-input {
       background: rgba(20, 20, 30, 0.85);
       border: 1.5px solid rgba(255, 255, 255, 0.15);
-      padding: 10px 16px;
+      padding: 8px 14px;
       border-radius: 30px;
       color: white;
-      font-size: 14px;
-      width: clamp(160px, 30vw, 280px);
+      font-size: 13px;
+      width: clamp(140px, 25vw, 220px);
       outline: none;
       transition: all 0.3s ease;
     }
@@ -110,10 +146,10 @@
       background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
       color: white;
       border: none;
-      padding: 10px 18px;
+      padding: 8px 16px;
       border-radius: 30px;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       transition: transform 0.2s ease;
       white-space: nowrap;
@@ -128,10 +164,114 @@
       transform: scale(1.05);
     }
 
+    /* GaiaFlix Hero Banner CSS */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      background: linear-gradient(to top, var(--bg-color) 10%, transparent 90%), url('https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1400&q=80') center/cover no-repeat;
+      display: flex;
+      align-items: flex-end;
+      padding: 40px clamp(20px, 5vw, 60px);
+      margin-bottom: 30px;
+    }
+
+    .hero-content {
+      max-width: 600px;
+      z-index: 2;
+    }
+
+    .featured-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .featured-tag::before {
+      content: '';
+      width: 12px;
+      height: 3px;
+      background: var(--accent-color);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .hero-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      font-weight: 600;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      margin-bottom: 18px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-hero-play {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s;
+    }
+
+    .btn-hero-play:hover { transform: scale(1.05); }
+
+    .btn-hero-info {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-hero-info:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* Catalog Sections */
     .catalog-wrapper {
       max-width: 1500px;
       margin: 0 auto;
-      padding: 24px clamp(16px, 3vw, 35px);
+      padding: 0 clamp(16px, 3vw, 35px) 40px;
       width: 100%;
       flex: 1;
     }
@@ -139,7 +279,7 @@
     .homepage-banner-box {
       width: 100%;
       min-height: 90px;
-      margin-bottom: 24px;
+      margin-bottom: 30px;
       background: rgba(18, 18, 26, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 12px;
@@ -149,12 +289,41 @@
       overflow: hidden;
     }
 
-    .section-title {
-      font-size: clamp(15px, 2.5vw, 19px);
-      font-weight: 800;
-      margin-bottom: 18px;
-      color: #e2e8f0;
+    .category-section {
+      margin-bottom: 35px;
     }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(16px, 2.5vw, 20px);
+      font-weight: 800;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .view-all {
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .view-all:hover { color: #ffffff; }
 
     .media-grid {
       display: grid;
@@ -170,7 +339,7 @@
 
     @media (min-width: 1024px) {
       .media-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
       }
     }
 
@@ -210,6 +379,19 @@
       transform: scale(1.05);
     }
 
+    .hd-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
     .play-overlay {
       position: absolute;
       inset: 0;
@@ -235,6 +417,7 @@
       justify-content: center;
       font-size: 16px;
       box-shadow: 0 0 20px rgba(225, 29, 72, 0.8);
+      color: white;
     }
 
     .card-footer {
@@ -443,32 +626,51 @@
 </head>
 <body>
 
-  <!-- Top Navbar with Clean RGB Glowing Logo -->
+  <!-- GaiaFlix Style Floating Pill Header -->
   <header>
-    <a href="/" class="brand-logo">
-      <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));">
-        <defs>
-          <linearGradient id="rgbGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ff0055"/>
-            <stop offset="33%" stop-color="#00ff66"/>
-            <stop offset="66%" stop-color="#00ffff"/>
-            <stop offset="100%" stop-color="#cc00ff"/>
-          </linearGradient>
-        </defs>
-        <circle cx="16" cy="16" r="15" stroke="url(#rgbGlow)" stroke-width="2.5" fill="#0b1120"/>
-        <circle cx="16" cy="16" r="5" fill="url(#rgbGlow)"/>
-        <rect x="14" y="5" width="4" height="6" rx="2" fill="url(#rgbGlow)"/>
-        <rect x="14" y="21" width="4" height="6" rx="2" fill="url(#rgbGlow)"/>
-      </svg>
-      <div class="brand-name">Hub<span>Stream</span></div>
-    </a>
-    <div class="header-controls">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search title..." oninput="handleSearch()">
-      <button class="btn-add" onclick="openAddForm()">+ Add</button>
+    <div class="nav-pill-container">
+      <a href="/" class="brand-logo">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="15" stroke="#e11d48" stroke-width="2.5" fill="#0b1120"/>
+          <circle cx="16" cy="16" r="5" fill="#38bdf8"/>
+        </svg>
+        <div class="brand-name">Hub<span>Stream</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#" class="active">Home</a></li>
+        <li><a href="#">Movies</a></li>
+        <li><a href="#">Series</a></li>
+        <li><a href="#">Anime</a></li>
+        <li><a href="#">Cartoons</a></li>
+        <li><a href="#">Sports</a></li>
+      </ul>
+      <div class="header-controls">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search title..." oninput="handleSearch()">
+        <button class="btn-add" onclick="openAddForm()">+ Add</button>
+      </div>
     </div>
   </header>
 
-  <!-- Catalog View -->
+  <!-- Featured Hero Banner (GaiaFlix Style) -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <div class="featured-tag">Featured Today</div>
+      <h1 class="hero-title" id="heroTitle">Spider-Man: Brand New Day</h1>
+      <div class="hero-meta">
+        <span style="color: #f59e0b;">★ 8.5</span>
+        <span>2026</span>
+        <span>Movie</span>
+        <span>Action • Adventure</span>
+      </div>
+      <p class="hero-desc">Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker...</p>
+      <div class="hero-buttons">
+        <button class="btn-hero-play" onclick="openFeaturedPlay()">▶ Play</button>
+        <button class="btn-hero-info">More info</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalog View with Sections -->
   <main class="catalog-wrapper">
     <div class="homepage-banner-box" id="homeAdBox">
       <script>
@@ -483,8 +685,13 @@
       </script>
     </div>
 
-    <div class="section-title">Live Streams & Movies</div>
-    <div class="media-grid" id="gridArea"></div>
+    <div class="category-section">
+      <div class="category-header">
+        <div class="section-title">Trending Movies & Streams</div>
+        <div class="view-all">View all</div>
+      </div>
+      <div class="media-grid" id="gridArea"></div>
+    </div>
   </main>
 
   <!-- EMBEDDED THEATER PLAYER -->
@@ -634,6 +841,7 @@
 
         card.innerHTML = `
           <div class="poster-box">
+            <div class="hd-badge">HD</div>
             <div class="play-overlay"><div class="play-btn-circle">▶</div></div>
             <img src="${item.poster || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'}" alt="${item.title}" loading="lazy">
           </div>
@@ -650,6 +858,10 @@
       clearTimeout(searchDebounce);
       const query = document.getElementById("searchInput").value.trim();
       searchDebounce = setTimeout(() => fetchMovies(query), 250);
+    }
+
+    function openFeaturedPlay() {
+      openTheater({ id: 1709391, title: "Spider-Man: Brand New Day" });
     }
 
     function openTheater(item) {
@@ -739,6 +951,7 @@
 
       card.innerHTML = `
         <div class="poster-box">
+          <div class="hd-badge">HD</div>
           <div class="play-overlay"><div class="play-btn-circle">▶</div></div>
           <img src="${poster || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'}" alt="${title}">
         </div>
