@@ -4,7 +4,7 @@ import telebot
 from flask import Flask
 
 # Apna token yahan daal do
-TOKEN = "712345678:ABCdefGhIJKlmNoPQRsTUVwxyZ"  
+TOKEN = "8971897939:AAFK8opTqe11e4zsXQktpsfpK5NIKD3Zu1c"  
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
