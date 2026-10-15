@@ -1,36 +1,44 @@
+import os
 import telebot
-from telebot import types
+from flask import Flask, request
+# Yahan "YOUR_BOT_API_TOKEN_HERE" hata kar apna asli BotFather token seedha daal do
+TOKEN = "8971897939:AAFK8opTqe11e4zsXQktpsfpK5NIKD3Zu1c"  
 
-# BotFather se mila hua API token yaha dalein
-TOKEN = "YOUR_BOT_API_TOKEN_HERE"
 bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKEN)
+server = Flask(__name__)
 
-# Jab bhi koi /start dabaye ya link se aaye
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    user_name = message.from_user.first_name
-    
-    # Inline button jo user ko wapas website par le jayega aur pass active karega
-    markup = types.InlineKeyboardMarkup()
-    activate_btn = types.InlineKeyboardButton(
-        "🎬 Activate 24H Pass Now", 
+@bot.message_handler(commands=['start', 'getpass'])
+def send_pass_link(message):
+    user_name = message.from_user.first_name or "User"
+    markup = telebot.types.InlineKeyboardMarkup()
+    activate_btn = telebot.types.InlineKeyboardButton(
+        "🎬 Click to Activate 24H Pass", 
         url="https://hubstreamofficial.vercel.app/?pass=active"
     )
     markup.add(activate_btn)
     
-    welcome_text = (
-        f"👋 Hello *{user_name}*!\n\n"
-        f"Welcome to *HubStream* Access Bot.\n"
-        f"Click the button below to instantly unlock your 24-hour movie streaming pass on the website:"
+    response_text = (
+        f"👋 Hey *{user_name}*!\n\n"
+        f"Your 24-hour movie streaming pass for *HubStream* is ready.\n\n"
+        f"👇 Click the button below to unlock your access instantly:"
     )
-    
-    bot.send_message(
-        message.chat.id, 
-        welcome_text, 
-        reply_markup=markup, 
-        parse_mode="Markdown"
-    )
+    bot.send_message(message.chat.id, response_text, reply_markup=markup, parse_mode="Markdown")
+
+@server.route(f"/{TOKEN}", methods=['POST'])
+def webhook():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@server.route("/")
+def webhook_info():
+    return "HubStream Bot is running!", 200
 
 if __name__ == "__main__":
-    print("Bot is running...")
-    bot.infinity_polling()
+    # Render khud PORT environment variable assign karta hai
+    port = int(os.environ.get('PORT', 5000))
+    # Webhook setup kar lo ya polling (agar simple rakhna hai)
+    # Render Web Service ke liye polling ki jagah webhook ya background thread use hota hai, 
+    # lekin agar polling chalani hai toh Flask ko dummy health-check ke liye rakhte hain.
