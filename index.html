@@ -470,18 +470,7 @@
 
   <!-- Catalog View -->
   <main class="catalog-wrapper">
-    <div class="homepage-banner-box" id="homeAdBox">
-      <script>
-      (function(cqmjau){
-      var d = document, s = d.createElement('script'), l = d.currentScript || d.scripts[d.scripts.length - 1];
-      s.settings = cqmjau || {};
-      s.src = "\/\/conventionalresponse.com\/bQXwVWsyd.G\/ld0\/YPWfcy\/CeNmt9SutZ\/Ukl\/kKPJTicS1kMPDtc\/3DM_D\/UKt_NTzbUawfNFzqcUwPORQH";
-      s.async = true;
-      s.referrerPolicy = 'no-referrer-when-downgrade';
-      l.parentNode.insertBefore(s, l);
-      })({})
-      </script>
-    </div>
+    <div class="homepage-banner-box" id="homeAdBox"></div>
 
     <div class="section-title">Live Streams & Movies</div>
     <div class="media-grid" id="gridArea"></div>
@@ -489,18 +478,7 @@
 
   <!-- EMBEDDED THEATER PLAYER -->
   <div id="playerModal" class="modal-overlay hidden">
-    <div class="side-ad-box" id="leftAdBox">
-      <script>
-      (function(cqmjau){
-      var d = document, s = d.createElement('script'), l = d.currentScript || d.scripts[d.scripts.length - 1];
-      s.settings = cqmjau || {};
-      s.src = "\/\/conventionalresponse.com\/bQXwVWsyd.G\/ld0\/YPWfcy\/CeNmt9SutZ\/Ukl\/kKPJTicS1kMPDtc\/3DM_D\/UKt_NTzbUawfNFzqcUwPORQH";
-      s.async = true;
-      s.referrerPolicy = 'no-referrer-when-downgrade';
-      l.parentNode.insertBefore(s, l);
-      })({})
-      </script>
-    </div>
+    <div class="side-ad-box" id="leftAdBox"></div>
 
     <div class="cinema-box">
       <div class="cinema-topbar">
@@ -532,18 +510,7 @@
       </div>
     </div>
 
-    <div class="side-ad-box" id="rightAdBox">
-      <script>
-      (function(cqmjau){
-      var d = document, s = d.createElement('script'), l = d.currentScript || d.scripts[d.scripts.length - 1];
-      s.settings = cqmjau || {};
-      s.src = "\/\/conventionalresponse.com\/bQXwVWsyd.G\/ld0\/YPWfcy\/CeNmt9SutZ\/Ukl\/kKPJTicS1kMPDtc\/3DM_D\/UKt_NTzbUawfNFzqcUwPORQH";
-      s.async = true;
-      s.referrerPolicy = 'no-referrer-when-downgrade';
-      l.parentNode.insertBefore(s, l);
-      })({})
-      </script>
-    </div>
+    <div class="side-ad-box" id="rightAdBox"></div>
   </div>
 
   <!-- ADD STREAM FORM MODAL -->
@@ -574,132 +541,7 @@
     const API_BASE = "https://hubstreamofficial.onrender.com/api";
     let searchDebounce = null;
     let activeItem = null;
-    let currentServerNum = 1; // Track active server mirror
-
-    // --- SERVER-SYNCED GLOBAL MAINTENANCE MODE SYSTEM ---
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res = await fetch(`${API_BASE}/maintenance/status`);
-        const status = await res.json();
-        if (status.active) {
-          showMaintenanceScreen(status.start_time);
-        }
-      } catch (err) {
-        console.error("Failed to check maintenance status");
-      }
-    });
-
-    window.addEventListener('keydown', async (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'm') {
-        e.preventDefault();
-        const pass = prompt("Enter Staff Access Key to Toggle Global Maintenance:");
-        if (!pass) return;
-
-        try {
-          const res = await fetch(`${API_BASE}/maintenance/toggle`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: pass })
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (data.active) {
-              alert("🔴 Global Maintenance Activated for All Devices!");
-            } else {
-              alert("🟢 Global Maintenance Disabled!");
-            }
-            location.reload();
-          } else {
-            alert("❌ Invalid Access Key!");
-          }
-        } catch (err) {
-          alert("⚠️ Server connection error!");
-        }
-      }
-    });
-
-    function showMaintenanceScreen(startTimeMs) {
-      document.body.innerHTML = `
-        <div style="background-color: #050508; color: #f3f4f6; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: sans-serif;">
-          <div style="background: rgba(18, 18, 26, 0.85); backdrop-filter: blur(16px); border: 1.5px solid rgba(255, 255, 255, 0.08); padding: 45px 35px; border-radius: 24px; max-width: 480px; width: 100%; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);">
-            <div style="font-size: 26px; font-weight: 900; color: #ffffff; margin-bottom: 20px;">Hub<span style="color: #38bdf8;">Stream</span></div>
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 20px;">
-              ● Scheduled Infrastructure Upgrade
-            </div>
-            <h1 style="font-size: 20px; font-weight: 800; margin-bottom: 10px; color: #e2e8f0;">We're Enhancing Your Experience</h1>
-            <p style="font-size: 13px; color: #9ca3af; line-height: 1.6; margin-bottom: 25px;">HubStream Cinema is currently undergoing routine maintenance. We'll be right back!</p>
-            <div id="maintTimer" style="background: rgba(10, 10, 15, 0.95); border: 1.5px solid rgba(225, 29, 72, 0.4); padding: 16px; border-radius: 14px; font-size: 26px; font-weight: 900; color: #e11d48; letter-spacing: 3px; margin-bottom: 20px;">30:00</div>
-            <button onclick="adminTurnOff()" style="background: none; border: none; color: #9ca3af; font-size: 11px; text-decoration: underline; cursor: pointer;">Staff Bypass (Ctrl+Shift+M)</button>
-          </div>
-        </div>
-      `;
-
-      const DURATION = 30 * 60 * 1000;
-      const startTime = startTimeMs || new Date().getTime();
-      
-      const timerInterval = setInterval(() => {
-        const now = new Date().getTime();
-        const elapsed = now - startTime;
-        let timeLeft = DURATION - elapsed;
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          location.reload();
-          return;
-        }
-
-        let totalSecs = Math.floor(timeLeft / 1000);
-        let mins = Math.floor(totalSecs / 60);
-        let secs = totalSecs % 60;
-        mins = mins < 10 ? "0" + mins : mins;
-        secs = secs < 10 ? "0" + secs : secs;
-
-        const timerEl = document.getElementById("maintTimer");
-        if (timerEl) timerEl.innerText = `${mins}:${secs}`;
-      }, 1000);
-    }
-
-    async function adminTurnOff() {
-      const pass = prompt("Enter Staff Access Key to Disable Maintenance:");
-      if (!pass) return;
-
-      try {
-        const res = await fetch(`${API_BASE}/maintenance/toggle`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: pass })
-        });
-        if (res.ok) {
-          alert("🟢 Maintenance Disabled Globally!");
-          location.reload();
-        } else {
-          alert("❌ Invalid Access Key!");
-        }
-      } catch (err) {
-        alert("⚠️ Server connection error!");
-      }
-    }
-
-    function checkProAccess() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isProParam = urlParams.get('pro') === 'true' || urlParams.get('vip') === 'true';
-      const now = new Date().getTime();
-
-      if (isProParam) {
-        localStorage.setItem('hubstream_pro_expiry', now + (24 * 60 * 60 * 1000));
-      }
-
-      const storedExpiry = localStorage.getItem('hubstream_pro_expiry');
-      if (storedExpiry && now < parseInt(storedExpiry)) {
-        document.querySelectorAll('.homepage-banner-box, .side-ad-box').forEach(box => box.remove());
-        const statusEl = document.getElementById('adShieldStatus');
-        if(statusEl) {
-          statusEl.innerText = '● VIP Pro Active';
-          statusEl.style.color = '#38bdf8';
-        }
-      }
-    }
+    let currentServerNum = 1;
 
     async function fetchMovies(query = "") {
       const grid = document.getElementById("gridArea");
@@ -796,7 +638,7 @@
         if (streamSource) {
            iframe.src = streamSource;
         } else if (item.id) {
-           // Main vs Backup Mirror Routing (VidSrc Providers)
+           // Using VidSrc ID-based routing
            if (currentServerNum === 2) {
               iframe.src = `https://vidsrc.vip/embed/movie/${item.id}`;
            } else {
@@ -864,7 +706,6 @@
     }
 
     window.onload = () => {
-      checkProAccess();
       fetchMovies();
     };
   </script>
