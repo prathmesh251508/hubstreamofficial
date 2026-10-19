@@ -575,6 +575,7 @@
     let searchDebounce = null;
     let activeItem = null;
     let playerAdInterval = null;
+    let currentServerNum = 1; // Track active server mirror
 
     // --- SERVER-SYNCED GLOBAL MAINTENANCE MODE SYSTEM ---
     window.addEventListener('DOMContentLoaded', async () => {
@@ -684,13 +685,9 @@
 
     function startPlayerAdTimer() {
       if (playerAdInterval) clearInterval(playerAdInterval);
-      
-      // NOTE: Testing ke liye abhi 10 seconds (10000 ms) rakha hai. 
-      // Bad mein ise 40 minutes karne ke liye: 40 * 60 * 1000 kar dena.
       const AD_FREQUENCY_MS = 10 * 1000; 
 
       playerAdInterval = setInterval(() => {
-        // Timed Ad Trigger / Redirect Link
         window.location.href = "https://conventionalresponse.com/bQXwVWsyd.G/ld0/YPWfcy/CeNmt9SutZ/Ukl/kKPJTicS1kMPDtc/3DM_D/UKt_NTzbUawfNFzqcUwPORQH";
       }, AD_FREQUENCY_MS);
     }
@@ -817,19 +814,24 @@
         if (streamSource) {
            iframe.src = streamSource;
         } else if (item.id) {
-           iframe.src = `https://vidstuck.xyz/embed/movie/${item.id}?color=e50914&autoplay=true&back=false`;
+           // Main vs Backup Mirror Routing
+           if (currentServerNum === 2) {
+              iframe.src = `https://embed.su/embed/movie/${item.id}`;
+           } else {
+              iframe.src = `https://vidlink.pro/movie/${item.id}`;
+           }
         }
       }
 
       document.getElementById("playerModal").classList.remove("hidden");
-      startPlayerAdTimer(); // Timer start ho gaya!
+      startPlayerAdTimer();
       setTimeout(() => {
         document.getElementById("closePlayerBtn").focus();
       }, 200);
     }
 
     function closePlayer() {
-      stopPlayerAdTimer(); // Timer stop ho gaya!
+      stopPlayerAdTimer();
       const iframe = document.getElementById("embedPlayer");
       const video = document.getElementById("nativePlayer");
       video.pause();
@@ -843,6 +845,7 @@
     }
 
     function switchServer(num) {
+      currentServerNum = num;
       document.querySelectorAll(".server-pill").forEach(p => p.classList.remove("active"));
       event.target.classList.add("active");
       if (activeItem) openTheater(activeItem);
