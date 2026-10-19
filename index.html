@@ -796,11 +796,11 @@
         if (streamSource) {
            iframe.src = streamSource;
         } else if (item.id) {
-           // Main vs Backup Mirror Routing
+           // Main vs Backup Mirror Routing (VidSrc Providers)
            if (currentServerNum === 2) {
-              iframe.src = `https://embed.su/embed/movie/${item.id}`;
+              iframe.src = `https://vidsrc.vip/embed/movie/${item.id}`;
            } else {
-              iframe.src = `https://vidlink.pro/movie/${item.id}`;
+              iframe.src = `https://vidsrc.cc/v2/embed/movie/${item.id}`;
            }
         }
       }
