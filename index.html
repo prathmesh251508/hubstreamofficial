@@ -490,9 +490,14 @@
       </div>
 
       <div class="screen-stage">
+        <!-- Enhanced Click-Shield to absorb popup/ad triggers on initial clicks -->
         <div id="clickShield" style="position: absolute; inset: 0; z-index: 30; background: transparent; cursor: pointer;" onclick="
-          this.style.pointerEvents = 'none';
-          setTimeout(() => { this.style.display = 'none'; }, 500);
+          let clicks = parseInt(this.getAttribute('data-clicks') || '0') + 1;
+          this.setAttribute('data-clicks', clicks);
+          if (clicks >= 5) {
+              this.style.pointerEvents = 'none';
+              this.style.display = 'none';
+          }
         "></div>
 
         <iframe id="embedPlayer" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="no-referrer"></iframe>
@@ -610,6 +615,7 @@
       
       shield.style.display = "block";
       shield.style.pointerEvents = "auto";
+      shield.setAttribute('data-clicks', '0'); // Reset clicks on open
       video.pause();
       iframe.src = "about:blank";
 
@@ -638,7 +644,6 @@
         if (streamSource) {
            iframe.src = streamSource;
         } else if (item.id) {
-           // Using VidSrc ID-based routing
            if (currentServerNum === 2) {
               iframe.src = `https://vidsrc.vip/embed/movie/${item.id}`;
            } else {
